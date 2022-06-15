@@ -164,22 +164,22 @@ VideoStreamClient::Send (void)
 
   if (Ipv4Address::IsMatchingType (m_peerAddress))
   {
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s client sent 10 bytes to " <<
+    NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Client sent 10 bytes to " <<
                   Ipv4Address::ConvertFrom (m_peerAddress) << " port " << m_peerPort);
   }
   else if (Ipv6Address::IsMatchingType (m_peerAddress))
   {
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s client sent 10 bytes to " <<
+    NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Client sent 10 bytes to " <<
                   Ipv6Address::ConvertFrom (m_peerAddress) << " port " << m_peerPort);
   }
   else if (InetSocketAddress::IsMatchingType (m_peerAddress))
   {
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s client sent 10 bytes to " <<
+    NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Client sent 10 bytes to " <<
                   InetSocketAddress::ConvertFrom (m_peerAddress).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (m_peerAddress).GetPort ());
   }
   else if (Inet6SocketAddress::IsMatchingType (m_peerAddress))
   {
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s client sent 10 bytes to " <<
+    NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Client sent 10 bytes to " <<
                   Inet6SocketAddress::ConvertFrom (m_peerAddress).GetIpv6 () << " port " << Inet6SocketAddress::ConvertFrom (m_peerAddress).GetPort ());
   }
 }
@@ -187,7 +187,7 @@ VideoStreamClient::Send (void)
 uint32_t 
 VideoStreamClient::ReadFromBuffer (void)
 {
-  // NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << " s, last buffer size: " << m_lastBufferSize << ", current buffer size: " << m_currentBufferSize);
+  // NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t s, last buffer size: " << m_lastBufferSize << ", current buffer size: " << m_currentBufferSize);
   if (m_currentBufferSize < m_frameRate) 
   {
 
@@ -203,7 +203,7 @@ VideoStreamClient::ReadFromBuffer (void)
     }
     else
     {
-      NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << " s: Not enough frames in the buffer, rebuffering!");
+      NS_LOG_DEBUG ("\t" << Simulator::Now ().GetSeconds () << "\t: Not enough frames in the buffer, rebuffering!");
       m_stopCounter = 0;  // reset the stopCounter
       m_rebufferCounter++;
       m_bufferEvent = Simulator::Schedule (Seconds (1.0), &VideoStreamClient::ReadFromBuffer, this);
@@ -214,7 +214,7 @@ VideoStreamClient::ReadFromBuffer (void)
   }
   else
   {
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << " s: Play video frames from the buffer");
+    NS_LOG_DEBUG ("\t" << Simulator::Now ().GetSeconds () << "\t: Play video frames from the buffer");
     if (m_stopCounter > 0) m_stopCounter = 0;    // reset the stopCounter
     if (m_rebufferCounter > 0) m_rebufferCounter = 0;   // reset the rebufferCounter
     m_currentBufferSize -= m_frameRate;
@@ -251,7 +251,7 @@ VideoStreamClient::HandleRead (Ptr<Socket> socket)
       {
         if (frameNum > 0)
         {
-          NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s client received frame " << frameNum-1 << " and " << m_frameSize << " bytes from " <<  InetSocketAddress::ConvertFrom (from).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (from).GetPort ());
+          NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Client received frame " << frameNum-1 << " and " << m_frameSize << " bytes from " <<  InetSocketAddress::ConvertFrom (from).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (from).GetPort ());
         }
 
         m_currentBufferSize++;
@@ -264,7 +264,7 @@ VideoStreamClient::HandleRead (Ptr<Socket> socket)
       {
         if (m_videoLevel > 1)
         {
-          NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s: Lower the video quality level!");
+          NS_LOG_DEBUG ("\t" << Simulator::Now ().GetSeconds () << "\t: Lower the video quality level!");
           m_videoLevel--;
           // reflect the change to the server
           uint8_t dataBuffer[10];
@@ -287,7 +287,7 @@ VideoStreamClient::HandleRead (Ptr<Socket> socket)
           Ptr<Packet> levelPacket = Create<Packet> (dataBuffer, 10);
           socket->SendTo (levelPacket, 0, from);
           m_currentBufferSize = m_frameRate;
-          NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds() << "s: Increase the video quality level to " << m_videoLevel);
+          NS_LOG_DEBUG ("\t" << Simulator::Now ().GetSeconds() << ": Increase the video quality level to " << m_videoLevel);
         }
       }
     }

@@ -130,6 +130,7 @@ VideoStreamServer::SetFrameFile (std::string frameFile)
 {
   NS_LOG_FUNCTION (this << frameFile);
   m_frameFile = frameFile;
+  NS_LOG_DEBUG ("Setting frame file: " << frameFile);
   if (frameFile != "")
   {
     std::string line;
@@ -140,7 +141,7 @@ VideoStreamServer::SetFrameFile (std::string frameFile)
       m_frameSizeList.push_back (result);
     }
   }
-  NS_LOG_INFO ("Frame list size: " << m_frameSizeList.size());
+  NS_LOG_DEBUG ("Frame list size: " << m_frameSizeList.size());
 }
 
 std::string
@@ -191,7 +192,7 @@ VideoStreamServer::Send (uint32_t ipAddress)
   uint32_t remainder = frameSize % m_maxPacketSize;
   SendPacket (clientInfo, remainder);
 
-  NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s server sent frame " << clientInfo->m_sent << " and " << frameSize << " bytes to " << InetSocketAddress::ConvertFrom (clientInfo->m_address).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (clientInfo->m_address).GetPort ());
+  NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Server sent frame " << clientInfo->m_sent << " and " << frameSize << " bytes to " << InetSocketAddress::ConvertFrom (clientInfo->m_address).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (clientInfo->m_address).GetPort ());
 
   clientInfo->m_sent += 1;
   if (clientInfo->m_sent < totalFrames)
@@ -210,7 +211,7 @@ VideoStreamServer::SendPacket (ClientInfo *client, uint32_t packetSize)
   // p->AddAtEnd (Create<Packet> (dataBuffer, packetSize));
   if (m_socket->SendTo (p, 0, client->m_address) < 0)
   {
-    NS_LOG_INFO ("Error while sending " << packetSize << "bytes to " << InetSocketAddress::ConvertFrom (client->m_address).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (client->m_address).GetPort ());
+    NS_LOG_ERROR ("Error while sending " << packetSize << "bytes to " << InetSocketAddress::ConvertFrom (client->m_address).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (client->m_address).GetPort ());
   }
 }
 
@@ -227,8 +228,7 @@ VideoStreamServer::HandleRead (Ptr<Socket> socket)
     socket->GetSockName (localAddress);
     if (InetSocketAddress::IsMatchingType (from))
     {
-      NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s server received " << packet->GetSize () << " bytes from " << InetSocketAddress::ConvertFrom (from).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (from).GetPort ());
-
+      NS_LOG_INFO ("\t" << Simulator::Now ().GetSeconds () << "\t: Server received " << packet->GetSize () << " bytes from " << InetSocketAddress::ConvertFrom (from).GetIpv4 () << " port " << InetSocketAddress::ConvertFrom (from).GetPort ());
       uint32_t ipAddr = InetSocketAddress::ConvertFrom (from).GetIpv4 ().Get ();
 
       // the first time we received the message from the client
@@ -249,7 +249,7 @@ VideoStreamServer::HandleRead (Ptr<Socket> socket)
 
         uint16_t videoLevel;
         sscanf((char *) dataBuffer, "%hu", &videoLevel);
-        NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s server received video level " << videoLevel);
+        NS_LOG_DEBUG ("\t" << Simulator::Now ().GetSeconds () << "\t: Server received video level " << videoLevel);
         m_clients.at (ipAddr)->m_videoLevel = videoLevel;
       }
     }
