@@ -10,7 +10,7 @@ I just made the code work with a newer version of NS3 and refactored the code to
 Clone this repository into the `contrib` folder of your NS3 installation.
 
 ### Basic code usage
-```
+```cpp
 #include "ns3/video-stream-module.h"
 
 int
